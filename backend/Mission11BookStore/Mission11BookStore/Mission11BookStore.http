@@ -1,0 +1,6 @@
+@Mission11BookStore_HostAddress = http://localhost:5072
+
+GET {{Mission11BookStore_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
