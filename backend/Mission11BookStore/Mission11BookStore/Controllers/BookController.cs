@@ -15,18 +15,56 @@ namespace Mission11BookStore.Controllers
             _context = context;
         }
 
-        [HttpGet("AllBooks")]
-        public IActionResult GetBooks(int pageSize = 5, int pageNum = 1, string sortOrder = "asc")
+        // Returns books with optional category filtering, sorting, and pagination
+        [HttpGet("GetBooks")]
+        public IActionResult GetBooks(string? category, int pageSize = 5, int pageNum = 1, string sortOrder = "asc")
         {
             var query = _context.Books.AsQueryable();
 
-            query = sortOrder.ToLower() == "desc"
-                ? query.OrderByDescending(b => b.Title)
-                : query.OrderBy(b => b.Title);
+            if (!string.IsNullOrEmpty(category) && category.ToLower() != "all")
+            {
+                query = query.Where(b => b.Category == category);
+            }
+
+            if (sortOrder.ToLower() == "desc")
+            {
+                query = query.OrderByDescending(b => b.Title);
+            }
+            else
+            {
+                query = query.OrderBy(b => b.Title);
+            }
 
             var totalNumBooks = query.Count();
 
             var books = query
+                .Skip((pageNum - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var result = new
+            {
+                books = books,
+                totalNumBooks = totalNumBooks
+            };
+
+            return Ok(result);
+        }
+
+        [HttpGet("AllBooks")]
+        public IActionResult GetBooks(string? category, int pageSize = 5, int pageNum = 1)
+        {
+            var query = _context.Books.AsQueryable();
+
+            if (!string.IsNullOrEmpty(category))
+            {
+                query = query.Where(b => b.Category == category);
+            }
+
+            var totalNumBooks = query.Count();
+
+            var books = query
+                .OrderBy(b => b.Title)
                 .Skip((pageNum - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
@@ -39,5 +77,18 @@ namespace Mission11BookStore.Controllers
 
             return Ok(response);
         }
+
+        [HttpGet("GetCategories")]
+        public IActionResult GetCategories()
+        {
+            var categories = _context.Books
+                .Select(b => b.Category)
+                .Distinct()
+                .OrderBy(c => c)
+                .ToList();
+
+            return Ok(categories);
+        }
+
     }
 }
