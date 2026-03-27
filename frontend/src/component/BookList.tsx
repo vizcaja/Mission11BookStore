@@ -2,18 +2,39 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import type { Book } from "../types/book";
 import type { BooksResponse } from "../types/booksresponse";
+import { useCart } from "../context/CartContext";
 
-function BookList() {
+type BookListProps = {
+  category: string;
+};
+
+function BookList({ category }: BookListProps) {
   const [books, setBooks] = useState<Book[]>([]);
   const [pageSize, setPageSize] = useState<number>(5);
   const [pageNum, setPageNum] = useState<number>(1);
   const [totalNumBooks, setTotalNumBooks] = useState<number>(0);
   const [sortOrder, setSortOrder] = useState<string>("asc");
 
+  const { addToCart } = useCart();
+
+  // Reset page when category changes
+  useEffect(() => {
+    setPageNum(1);
+  }, [category]);
+
+  // Fetch books whenever category, page, page size, or sort order changes
   useEffect(() => {
     const fetchBooks = async () => {
       const response = await axios.get<BooksResponse>(
-        `https://localhost:7192/Book/AllBooks?pageSize=${pageSize}&pageNum=${pageNum}&sortOrder=${sortOrder}`
+        "https://localhost:7192/Book/GetBooks",
+        {
+          params: {
+            category: category === "All" ? null : category,
+            pageSize: pageSize,
+            pageNum: pageNum,
+            sortOrder: sortOrder,
+          },
+        }
       );
 
       setBooks(response.data.books);
@@ -21,13 +42,14 @@ function BookList() {
     };
 
     fetchBooks();
-  }, [pageSize, pageNum, sortOrder]);
+  }, [category, pageSize, pageNum, sortOrder]);
 
   const totalPages = Math.ceil(totalNumBooks / pageSize);
 
   return (
-    <div className="container mt-4">
+    <div>
       <h1 className="mb-4">Online Bookstore</h1>
+      <h4 className="mb-3">Category: {category}</h4>
 
       <div className="row mb-3">
         <div className="col-md-4">
@@ -63,7 +85,7 @@ function BookList() {
       </div>
 
       {books.map((b) => (
-        <div key={b.bookID} className="card mb-3">
+        <div key={b.bookID} className="card mb-3 shadow-sm">
           <div className="card-body">
             <h3>{b.title}</h3>
             <p><strong>Author:</strong> {b.author}</p>
@@ -73,6 +95,13 @@ function BookList() {
             <p><strong>Category:</strong> {b.category}</p>
             <p><strong>Pages:</strong> {b.pageCount}</p>
             <p><strong>Price:</strong> ${b.price.toFixed(2)}</p>
+
+            <button
+              className="btn btn-success"
+              onClick={() => addToCart(b)}
+            >
+              Add to Cart
+            </button>
           </div>
         </div>
       ))}
@@ -89,7 +118,9 @@ function BookList() {
         {[...Array(totalPages)].map((_, i) => (
           <button
             key={i + 1}
-            className="btn btn-outline-primary"
+            className={`btn ${
+              pageNum === i + 1 ? "btn-dark" : "btn-outline-primary"
+            }`}
             onClick={() => setPageNum(i + 1)}
           >
             {i + 1}
@@ -98,7 +129,7 @@ function BookList() {
 
         <button
           className="btn btn-primary"
-          disabled={pageNum === totalPages}
+          disabled={pageNum === totalPages || totalPages === 0}
           onClick={() => setPageNum(pageNum + 1)}
         >
           Next

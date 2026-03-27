@@ -8,19 +8,15 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules/
-**/node_modules/
-backend/**/bin/
-backend/**/obj/
+frontend/node_modules/
 .vs/
 **/.vs/
-dist/
-dist-ssr/
-*.local
-build/
-.vs/
-**.vs/
 bin/
 obj/
+**/bin/
+**/obj/
+dist/
+build/
 
 # Editor directories and files
 .vscode/*
