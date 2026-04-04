@@ -90,5 +90,54 @@ namespace Mission11BookStore.Controllers
             return Ok(categories);
         }
 
+        [HttpPost("AddBook")]
+        public IActionResult AddBook([FromBody] Book newBook)
+        {
+            _context.Books.Add(newBook);
+            _context.SaveChanges();
+
+            return Ok(newBook);
+        }
+
+        [HttpPut("UpdateBook/{id}")]
+        public IActionResult UpdateBook(int id, [FromBody] Book updatedBook)
+        {
+            var existingBook = _context.Books.FirstOrDefault(b => b.BookID == id);
+
+            if (existingBook == null)
+            {
+                return NotFound(new { message = "Book not found." });
+            }
+
+            existingBook.Title = updatedBook.Title;
+            existingBook.Author = updatedBook.Author;
+            existingBook.Publisher = updatedBook.Publisher;
+            existingBook.ISBN = updatedBook.ISBN;
+            existingBook.Classification = updatedBook.Classification;
+            existingBook.Category = updatedBook.Category;
+            existingBook.PageCount = updatedBook.PageCount;
+            existingBook.Price = updatedBook.Price;
+
+            _context.Books.Update(existingBook);
+            _context.SaveChanges();
+
+            return Ok(existingBook);
+        }
+
+        [HttpDelete("DeleteBook/{id}")]
+        public IActionResult DeleteBook(int id)
+        {
+            var book = _context.Books.FirstOrDefault(b => b.BookID == id);
+
+            if (book == null)
+            {
+                return NotFound(new { message = "Book not found." });
+            }
+
+            _context.Books.Remove(book);
+            _context.SaveChanges();
+
+            return NoContent();
+        }
     }
 }
