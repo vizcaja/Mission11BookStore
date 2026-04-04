@@ -4,6 +4,7 @@ import BookList from "./component/BookList";
 import CategoryFilter from "./component/CategoryFilter";
 import CartPage from "./component/CartPage";
 import CartSummary from "./component/CartSummary";
+import AdminBooks from "./AdminBooks";
 import { CartProvider } from "./context/CartContext";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -38,6 +39,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/cart" element={<CartPage />} />
+          <Route path="/adminbooks" element={<AdminBooks />} />
         </Routes>
       </Router>
     </CartProvider>
